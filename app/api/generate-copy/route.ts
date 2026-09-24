@@ -41,11 +41,11 @@ Return ONLY a raw JSON object strictly adhering to this schema:
   ]
 }`;
 
-    const userPrompt = `Our Brand: ${myBrand}
-Target Audience: ${targetAudience}
-Competitor Brand: ${competitorName}
+    const userPrompt = `Our Brand: ${myBrand || "Our Brand"}
+Target Audience: ${targetAudience || "Target Buyers"}
+Competitor Brand: ${competitorName || "Competitor"}
 Competitor's Live Ad Copy:
-"${competitorAdCopy}"
+"${competitorAdCopy || "Buy our product today for 20% off!"}"
 
 Diagnose their ad vulnerability and engineer 3 distinct counter-attack ad copies. Return strictly raw JSON.`;
 
