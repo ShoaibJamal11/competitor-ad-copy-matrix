@@ -21,43 +21,34 @@ function cleanAndParseJSON(text: string) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { myBrand, targetAudience, competitors, rawAdCopies } = body;
+    const { myBrand, targetAudience, competitorName, competitorAdCopy } = body;
 
-    const systemPrompt = `You are a Principal Direct-Response Creative Strategist and Competitive Intelligence Director.
-Analyze the competitors' ad copy, positioning, and psychological hooks. Return ONLY a raw JSON object strictly adhering to this schema:
+    const systemPrompt = `You are a Principal Direct-Response Creative Director and Competitive Positioning Strategist.
+Analyze the competitor's ad copy and generate counter-positioning ad variations that outperform them.
+Return ONLY a raw JSON object strictly adhering to this schema:
 {
-  "marketAnalysis": {
-    "dominantMarketAngle": "Primary angle saturated by competitors",
-    "untappedOpportunity": "Specific gap competitors are failing to address",
-    "threatLevel": "High" | "Medium" | "Low"
-  },
-  "competitorBreakdowns": [
-    {
-      "competitorName": "Name of competitor",
-      "hookFramework": "Fear / Social Proof / Discount / Aspiration",
-      "corePromise": "Main claim made in copy",
-      "identifiedVulnerability": "Flaw or weakness in their messaging",
-      "counterPositionAngle": "How user's brand can decisively beat this angle"
-    }
+  "marketGapAnalysis": "2-sentence strategic teardown explaining what the competitor's ad promises and where their message falls short or sounds generic.",
+  "competitorWeaknesses": [
+    "Specific vulnerability in their hook or offer claim"
   ],
-  "counterAttackAds": [
+  "counterAngles": [
     {
-      "angleName": "Name of positioning angle (e.g. Radical Transparency / Us vs Them)",
-      "hookHeadline": "Punchy scroll-stopping headline",
-      "bodyCopy": "60-70 word direct-response body copy exploiting competitor flaws",
-      "recommendedCTA": "Call to action text"
+      "angleTitle": "Name of positioning angle (e.g. Radical Transparency / Us vs Them / Outcome Guarantee)",
+      "hookHeadline": "Punchy scroll-stopping 3-second hook headline",
+      "bodyCopy": "Persuasive 60-80 word direct-response body copy directly exploiting the competitor's blind spot",
+      "callToAction": "Action-oriented low friction CTA"
     }
   ]
 }`;
 
-    const userPrompt = `Our Brand: ${myBrand || "Our Brand"}
-Target Audience: ${targetAudience || "Target Buyers"}
-Competitors & Ad Copy Data:
-${rawAdCopies || JSON.stringify(competitors, null, 2)}
+    const userPrompt = `Our Brand: ${myBrand}
+Target Audience: ${targetAudience}
+Competitor Brand: ${competitorName}
+Competitor's Live Ad Copy:
+"${competitorAdCopy}"
 
-Conduct competitive ad copy teardown and generate high-converting counter-attack ad angles. Return strictly raw JSON.`;
+Diagnose their ad vulnerability and engineer 3 distinct counter-attack ad copies. Return strictly raw JSON.`;
 
-    // Fetch dynamic models to avoid deprecated or restricted models
     const modelListRes = await groq.models.list();
     const candidateIds = modelListRes.data
       .map((m: any) => m.id)
@@ -107,7 +98,6 @@ Conduct competitive ad copy teardown and generate high-converting counter-attack
         }
       } catch (err: any) {
         lastError = err;
-        console.warn(`Groq model ${model} failed, trying next...`);
       }
     }
 
@@ -121,7 +111,7 @@ Conduct competitive ad copy teardown and generate high-converting counter-attack
   } catch (error: any) {
     console.error("Competitor Analysis Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to analyze competitors" },
+      { error: error.message || "Failed to analyze competitor copy" },
       { status: 500 }
     );
   }
